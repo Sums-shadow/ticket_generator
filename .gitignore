@@ -1,6 +1,6 @@
 node_modules/
-serviceAccountKey.json
-ticket.png
+
+
 ticket.tiff
 output/
 .env
