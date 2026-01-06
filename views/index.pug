@@ -1,0 +1,185 @@
+doctype html
+html(lang="fr")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Gestion des Tickets - Gala
+    script(src="https://cdn.tailwindcss.com")
+    style.
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+      .ticket-card {
+        transition: all 0.3s ease;
+      }
+      .ticket-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      }
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+      }
+      .btn-secondary {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        transition: all 0.3s ease;
+      }
+      .btn-secondary:hover {
+        background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(245, 87, 108, 0.4);
+      }
+      .btn-success {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        transition: all 0.3s ease;
+      }
+      .btn-success:hover {
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(79, 172, 254, 0.4);
+      }
+      .alert {
+        animation: slideIn 0.3s ease;
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+  body(class="bg-gradient-to-br from-purple-50 to-pink-50 min-h-screen")
+    .container.mx-auto.px-4.py-8.max-w-7xl
+      // Header
+      .text-center.mb-8
+        h1.text-5xl.font-bold.text-gray-800.mb-2 Gestion des Tickets Gala
+        p.text-gray-600.text-lg Générez et gérez vos tickets avec codes QR
+        .mt-4
+          a.bg-gradient-to-r.from-green-600.to-emerald-600.text-white.font-bold.py-3.px-6.rounded-lg.shadow-lg.hover:shadow-xl.transition-all.inline-flex.items-center(href="/scan")
+            svg.w-5.h-5.mr-2(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+              path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a2 2 0 012 2v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 012-2zm12 0h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2a2 2 0 012-2zM5 20h2a2 2 0 002-2v-2a2 2 0 00-2-2H5a2 2 0 00-2 2v2a2 2 0 002 2z")
+            | Scanner un Ticket
+
+      // Alert messages
+      if error
+        .alert.bg-red-100.border-l-4.border-red-500.text-red-700.p-4.mb-6.rounded.shadow-lg
+          p.font-semibold ⚠️ Erreur
+          p= error
+      
+      if success
+        .alert.bg-green-100.border-l-4.border-green-500.text-green-700.p-4.mb-6.rounded.shadow-lg
+          p.font-semibold ✅ Succès
+          p= success
+
+      // Generate form
+      .bg-white.rounded-2xl.shadow-xl.p-8.mb-8
+        h2.text-2xl.font-bold.text-gray-800.mb-6.flex.items-center
+          svg.w-6.h-6.mr-2(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+            path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M12 4v16m8-8H4")
+          | Générer des Tickets
+        form(action="/generate", method="POST", onsubmit="showLoading()")
+          div(class="flex flex-col md:flex-row gap-4 items-end")
+            .flex-1
+              label.block.text-gray-700.font-semibold.mb-2(for="count") Nombre de tickets à générer
+              input#count(class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent", type="number", name="count", min="1", max="100", value="1", required)
+            button.btn-primary.text-white.font-bold.py-3.px-8.rounded-lg.shadow-lg(type="submit", id="submitBtn")
+              span#btnText Générer
+              span#btnLoading.loading.hidden.ml-2
+
+      // Tickets list
+      .bg-white.rounded-2xl.shadow-xl.p-8
+        div(class="flex flex-col md:flex-row justify-between items-center mb-6")
+          h2.text-2xl.font-bold.text-gray-800.flex.items-center
+            svg.w-6.h-6.mr-2(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+              path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2")
+            | Liste des Tickets (#{count})
+          
+          if tickets.length > 0
+            a.btn-success.text-white.font-bold.py-3.px-6.rounded-lg.shadow-lg.inline-flex.items-center(href="/download-all")
+              svg.w-5.h-5.mr-2(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+                path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
+              | Télécharger Tout
+
+        if tickets.length === 0
+          .text-center.py-12
+            svg.mx-auto.h-24.w-24.text-gray-400(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+              path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z")
+            p.text-gray-500.text-lg.mt-4 Aucun ticket généré pour le moment
+            p.text-gray-400 Utilisez le formulaire ci-dessus pour générer des tickets
+
+        else
+          div(class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6")
+            each ticket in tickets
+              .ticket-card.bg-gradient-to-br.from-white.to-gray-50.rounded-xl.shadow-lg.p-6.border.border-gray-200
+                .flex.justify-between.items-start.mb-4
+                  .flex-1
+                    .text-sm.text-gray-500.mb-1 Code
+                    .text-2xl.font-bold.text-purple-600.mb-2= ticket.code
+                    .text-xs.text-gray-400
+                      svg.w-4.h-4.inline.mr-1(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+                        path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z")
+                      = new Date(ticket.date).toLocaleString('fr-FR')
+                
+                a.btn-secondary.text-white.font-semibold.py-2.px-4.rounded-lg.shadow-md.w-full.text-center.inline-block(href=`/download/${ticket.code}`)
+                  svg.w-4.h-4.inline.mr-2(xmlns="http://www.w3.org/2000/svg", fill="none", viewBox="0 0 24 24", stroke="currentColor")
+                    path(stroke-linecap="round", stroke-linejoin="round", stroke-width="2", d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4")
+                  | Télécharger
+
+    script.
+      function showLoading() {
+        const btn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        
+        if (btn && btnText && btnLoading) {
+          btn.disabled = true;
+          btnText.textContent = 'Génération...';
+          btnLoading.classList.remove('hidden');
+        }
+      }
+
+      // Reset button state on page load (in case of error or page refresh)
+      window.addEventListener('load', function() {
+        const btn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnLoading = document.getElementById('btnLoading');
+        
+        if (btn && btnText && btnLoading) {
+          btn.disabled = false;
+          btnText.textContent = 'Générer';
+          btnLoading.classList.add('hidden');
+        }
+      });
+
+      // Auto-hide alerts after 5 seconds
+      setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+          alert.style.transition = 'opacity 0.5s';
+          alert.style.opacity = '0';
+          setTimeout(() => alert.remove(), 500);
+        });
+      }, 5000);
+
